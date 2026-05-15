@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pasta Online - Coral de Jovens</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: #f3f0e8;
+      color: #2f2f2f;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+      background: #fffaf0;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border: 1px solid #e2d6bd;
+    }
+
+    .cover {
+      text-align: center;
+      padding: 24px 10px;
+      border-bottom: 1px solid #e2d6bd;
+      margin-bottom: 22px;
+    }
+
+    .cover h1 {
+      font-size: 30px;
+      margin-bottom: 8px;
+      color: #3b2f20;
+    }
+
+    .cover p {
+      color: #776b5a;
+      font-size: 16px;
+    }
+
+    .song-list {
+      display: grid;
+      gap: 12px;
+    }
+
+    .song-button, .back-button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 17px;
+      cursor: pointer;
+      text-align: left;
+      background: #efe3c8;
+      color: #2f2f2f;
+      transition: 0.2s;
+    }
+
+    .song-button:hover, .back-button:hover {
+      background: #e0cfaa;
+    }
+
+    .song-page {
+      display: none;
+    }
+
+    .song-title {
+      font-size: 26px;
+      color: #3b2f20;
+      margin-bottom: 16px;
+    }
+
+    .lyrics {
+      white-space: pre-line;
+      font-size: 18px;
+      line-height: 1.7;
+      background: #fff;
+      padding: 20px;
+      border-radius: 14px;
+      border: 1px solid #eadfc8;
+      margin-bottom: 20px;
+    }
+
+    .back-button {
+      background: #3b2f20;
+      color: white;
+      text-align: center;
+    }
+
+    .back-button:hover {
+      background: #5a472f;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 13px;
+      color: #8a7b67;
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 12px;
+      }
+
+      .container {
+        padding: 18px;
+      }
+
+      .cover h1 {
+        font-size: 25px;
+      }
+
+      .lyrics {
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="home-page">
+      <div class="cover">
+        <h1>Pasta Online</h1>
+        <p>Coral de Jovens</p>
+      </div>
+
+      <div class="song-list" id="song-list"></div>
+
+      <div class="footer">
+        Selecione um hino para abrir a letra.
+      </div>
+    </div>
+
+    <div id="song-page" class="song-page">
+      <h2 class="song-title" id="song-title"></h2>
+      <div class="lyrics" id="song-lyrics"></div>
+      <button class="back-button" onclick="goBack()">Voltar para a página inicial</button>
+    </div>
+  </div>
+
+  <script>
+    const songs = [
+      {
+        title: "Hino 1 - Nome do Hino",
+        lyrics: `Aqui vai a letra do primeiro hino.
+
+Primeira estrofe...
+Segunda linha...
+Terceira linha...
+
+Coro:
+Aqui vai o coro do hino...`
+      },
+      {
+        title: "Hino 2 - Nome do Hino",
+        lyrics: `Aqui vai a letra do segundo hino.
+
+Primeira estrofe...
+Segunda linha...
+Terceira linha...
+
+Coro:
+Aqui vai o coro do hino...`
+      },
+      {
+        title: "Hino 3 - Nome do Hino",
+        lyrics: `Aqui vai a letra do terceiro hino.
+
+Primeira estrofe...
+Segunda linha...
+Terceira linha...
+
+Coro:
+Aqui vai o coro do hino...`
+      }
+    ];
+
+    const songList = document.getElementById("song-list");
+    const homePage = document.getElementById("home-page");
+    const songPage = document.getElementById("song-page");
+    const songTitle = document.getElementById("song-title");
+    const songLyrics = document.getElementById("song-lyrics");
+
+    songs.forEach((song, index) => {
+      const button = document.createElement("button");
+      button.className = "song-button";
+      button.innerText = song.title;
+      button.onclick = () => openSong(index);
+      songList.appendChild(button);
+    });
+
+    function openSong(index) {
+      songTitle.innerText = songs[index].title;
+      songLyrics.innerText = songs[index].lyrics;
+      homePage.style.display = "none";
+      songPage.style.display = "block";
+      window.scrollTo(0, 0);
+    }
+
+    function goBack() {
+      songPage.style.display = "none";
+      homePage.style.display = "block";
+      window.scrollTo(0, 0);
+    }
+  </script>
+</body>
+</html>
