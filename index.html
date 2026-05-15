@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Pasta Online - Coral de Jovens</title>
+
   <style>
     * {
       box-sizing: border-box;
@@ -20,31 +21,31 @@
     }
 
     .container {
-      max-width: 720px;
+      max-width: 760px;
       margin: 0 auto;
       background: #fffaf0;
       border-radius: 18px;
       padding: 24px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
       border: 1px solid #e2d6bd;
     }
 
     .cover {
       text-align: center;
-      padding: 24px 10px;
+      padding: 28px 10px;
       border-bottom: 1px solid #e2d6bd;
       margin-bottom: 22px;
     }
 
     .cover h1 {
-      font-size: 30px;
+      font-size: 32px;
       margin-bottom: 8px;
       color: #3b2f20;
     }
 
     .cover p {
       color: #776b5a;
-      font-size: 16px;
+      font-size: 17px;
     }
 
     .song-list {
@@ -52,7 +53,7 @@
       gap: 12px;
     }
 
-    .song-button, .back-button {
+    .song-button {
       width: 100%;
       border: none;
       border-radius: 12px;
@@ -65,7 +66,7 @@
       transition: 0.2s;
     }
 
-    .song-button:hover, .back-button:hover {
+    .song-button:hover {
       background: #e0cfaa;
     }
 
@@ -74,7 +75,7 @@
     }
 
     .song-title {
-      font-size: 26px;
+      font-size: 27px;
       color: #3b2f20;
       margin-bottom: 16px;
     }
@@ -83,7 +84,7 @@
       white-space: pre-line;
       font-size: 18px;
       line-height: 1.7;
-      background: #fff;
+      background: #ffffff;
       padding: 20px;
       border-radius: 14px;
       border: 1px solid #eadfc8;
@@ -91,9 +92,14 @@
     }
 
     .back-button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 16px;
+      font-size: 17px;
+      cursor: pointer;
       background: #3b2f20;
       color: white;
-      text-align: center;
     }
 
     .back-button:hover {
@@ -117,7 +123,7 @@
       }
 
       .cover h1 {
-        font-size: 25px;
+        font-size: 26px;
       }
 
       .lyrics {
@@ -126,8 +132,10 @@
     }
   </style>
 </head>
+
 <body>
   <div class="container">
+
     <div id="home-page">
       <div class="cover">
         <h1>Pasta Online</h1>
@@ -137,7 +145,7 @@
       <div class="song-list" id="song-list"></div>
 
       <div class="footer">
-        Selecione um hino para abrir a letra.
+        Clique no nome de um hino para abrir a letra.
       </div>
     </div>
 
@@ -146,42 +154,43 @@
       <div class="lyrics" id="song-lyrics"></div>
       <button class="back-button" onclick="goBack()">Voltar para a página inicial</button>
     </div>
+
   </div>
 
   <script>
     const songs = [
       {
         title: "Hino 1 - Nome do Hino",
-        lyrics: `Aqui vai a letra do primeiro hino.
+        lyrics: `Coloque aqui a letra do primeiro hino.
 
 Primeira estrofe...
 Segunda linha...
 Terceira linha...
 
 Coro:
-Aqui vai o coro do hino...`
+Coloque aqui o coro do hino.`
       },
       {
         title: "Hino 2 - Nome do Hino",
-        lyrics: `Aqui vai a letra do segundo hino.
+        lyrics: `Coloque aqui a letra do segundo hino.
 
 Primeira estrofe...
 Segunda linha...
 Terceira linha...
 
 Coro:
-Aqui vai o coro do hino...`
+Coloque aqui o coro do hino.`
       },
       {
         title: "Hino 3 - Nome do Hino",
-        lyrics: `Aqui vai a letra do terceiro hino.
+        lyrics: `Coloque aqui a letra do terceiro hino.
 
 Primeira estrofe...
 Segunda linha...
 Terceira linha...
 
 Coro:
-Aqui vai o coro do hino...`
+Coloque aqui o coro do hino.`
       }
     ];
 
