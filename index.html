@@ -29,14 +29,17 @@
       <h2 id="hinoTitle"></h2>
 
       <div class="edit-bar">
-        <button onclick="enableEdit()">Editar</button>
-        <button onclick="changeColor()">Cor da letra</button>
-        <button onclick="increaseFont()">A+</button>
-        <button onclick="decreaseFont()">A-</button>
-        <button onclick="saveHino()">Salvar</button>
+        <button id="editBtn" onclick="enableEdit()">Editar</button>
       </div>
 
-      <textarea id="hinoLyrics" disabled></textarea>
+      <div id="editTools" class="edit-tools hidden">
+        <button id="colorBtn" onclick="changeColor()">Cor da letra</button>
+        <button id="increaseFontBtn" onclick="increaseFont()">A+</button>
+        <button id="decreaseFontBtn" onclick="decreaseFont()">A-</button>
+        <button id="saveBtn" onclick="saveHino()">Salvar</button>
+      </div>
+
+      <div id="hinoLyrics" class="hino-lyrics" contenteditable="false"></div>
     </section>
   </main>
 

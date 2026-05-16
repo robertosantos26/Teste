@@ -93,15 +93,27 @@ main {
   cursor: pointer;
 }
 
-textarea {
+.edit-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.edit-tools button {
+  background: #1f4f3a;
+  color: white;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.hino-lyrics {
   width: 100%;
   min-height: 420px;
   padding: 18px;
   font-size: 20px;
   line-height: 1.6;
-  border: none;
-  border-radius: 12px;
-  resize: vertical;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  background: white;
+  white-space: pre-wrap;
 }

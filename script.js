@@ -14,6 +14,21 @@ const hinoPage = document.getElementById("hinoPage");
 const hinosList = document.getElementById("hinosList");
 const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
+const editTools = document.getElementById("editTools");
+const editBtn = document.getElementById("editBtn");
+const colorBtn = document.getElementById("colorBtn");
+const increaseFontBtn = document.getElementById("increaseFontBtn");
+const decreaseFontBtn = document.getElementById("decreaseFontBtn");
+const saveBtn = document.getElementById("saveBtn");
+
+let isEditMode = false;
+
+function setEditMode(enabled) {
+  isEditMode = enabled;
+  hinoLyrics.contentEditable = enabled ? "true" : "false";
+  editTools.classList.toggle("hidden", !enabled);
+  editBtn.textContent = enabled ? "Editando" : "Editar";
+}
 
 function checkPassword() {
   const senha = prompt("Digite a senha:");
@@ -57,10 +72,10 @@ function openHino(hino) {
   currentHino = hino;
 
   hinoTitle.textContent = hino.title;
-  hinoLyrics.value = hino.lyrics || "";
+  hinoLyrics.textContent = hino.lyrics || "";
   hinoLyrics.style.color = hino.color || "#222222";
   hinoLyrics.style.fontSize = (hino.font_size || 20) + "px";
-  hinoLyrics.disabled = true;
+  setEditMode(false);
 
   homePage.classList.add("hidden");
   hinoPage.classList.remove("hidden");
@@ -69,6 +84,7 @@ function openHino(hino) {
 function goHome() {
   hinoPage.classList.add("hidden");
   homePage.classList.remove("hidden");
+  setEditMode(false);
   loadHinos();
 }
 
@@ -107,20 +123,26 @@ async function addHino() {
 }
 
 function enableEdit() {
+  if (!currentHino) return;
+
+  if (isEditMode) {
+    hinoLyrics.focus();
+    return;
+  }
+
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
   }
 
-  hinoLyrics.disabled = false;
+  setEditMode(true);
   hinoLyrics.focus();
 }
 
 async function saveHino() {
   if (!currentHino) return;
-
-  if (!checkPassword()) {
-    alert("Senha incorreta.");
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
     return;
   }
 
@@ -130,7 +152,7 @@ async function saveHino() {
   const { error } = await supabaseClient
     .from("hinos")
     .update({
-      lyrics: hinoLyrics.value,
+      lyrics: hinoLyrics.innerText,
       color: color,
       font_size: fontSize
     })
@@ -142,13 +164,13 @@ async function saveHino() {
     return;
   }
 
-  hinoLyrics.disabled = true;
+  setEditMode(false);
   alert("Hino salvo com sucesso.");
 }
 
 function changeColor() {
-  if (!checkPassword()) {
-    alert("Senha incorreta.");
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
     return;
   }
 
@@ -160,11 +182,21 @@ function changeColor() {
 }
 
 function increaseFont() {
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
+    return;
+  }
+
   const currentSize = parseInt(hinoLyrics.style.fontSize) || 20;
   hinoLyrics.style.fontSize = currentSize + 2 + "px";
 }
 
 function decreaseFont() {
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
+    return;
+  }
+
   const currentSize = parseInt(hinoLyrics.style.fontSize) || 20;
 
   if (currentSize > 12) {
