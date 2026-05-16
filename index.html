@@ -36,7 +36,14 @@
         <button id="saveBtn" onclick="saveHino()" disabled>Salvar</button>
       </div>
 
-      <textarea id="hinoLyrics" disabled></textarea>
+      <div id="editTools" class="edit-tools hidden">
+        <button id="colorBtn" onclick="changeColor()">Cor da letra</button>
+        <button id="increaseFontBtn" onclick="increaseFont()">A+</button>
+        <button id="decreaseFontBtn" onclick="decreaseFont()">A-</button>
+        <button id="saveBtn" onclick="saveHino()">Salvar</button>
+      </div>
+
+      <div id="hinoLyrics" class="hino-lyrics" contenteditable="false"></div>
     </section>
   </main>
 

@@ -14,6 +14,7 @@ const hinoPage = document.getElementById("hinoPage");
 const hinosList = document.getElementById("hinosList");
 const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
+const editTools = document.getElementById("editTools");
 const editBtn = document.getElementById("editBtn");
 const colorBtn = document.getElementById("colorBtn");
 const increaseFontBtn = document.getElementById("increaseFontBtn");
@@ -24,11 +25,8 @@ let isEditMode = false;
 
 function setEditMode(enabled) {
   isEditMode = enabled;
-  hinoLyrics.disabled = !enabled;
-  colorBtn.disabled = !enabled;
-  increaseFontBtn.disabled = !enabled;
-  decreaseFontBtn.disabled = !enabled;
-  saveBtn.disabled = !enabled;
+  hinoLyrics.contentEditable = enabled ? "true" : "false";
+  editTools.classList.toggle("hidden", !enabled);
   editBtn.textContent = enabled ? "Editando" : "Editar";
 }
 
@@ -74,7 +72,7 @@ function openHino(hino) {
   currentHino = hino;
 
   hinoTitle.textContent = hino.title;
-  hinoLyrics.value = hino.lyrics || "";
+  hinoLyrics.textContent = hino.lyrics || "";
   hinoLyrics.style.color = hino.color || "#222222";
   hinoLyrics.style.fontSize = (hino.font_size || 20) + "px";
   setEditMode(false);
@@ -154,7 +152,7 @@ async function saveHino() {
   const { error } = await supabaseClient
     .from("hinos")
     .update({
-      lyrics: hinoLyrics.value,
+      lyrics: hinoLyrics.innerText,
       color: color,
       font_size: fontSize
     })
