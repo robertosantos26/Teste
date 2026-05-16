@@ -1,9 +1,10 @@
 const SUPABASE_URL = "https://xqwzeznbznopmupigfuz.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3plem5iem5vcG11cGlnZnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODMxOTAsImV4cCI6MjA5NDQ1OTE5MH0.wr7B1BClyxhN0IrmlcGycN5vatE51311LNYvTwLEY_I";
+
+const SUPABASE_ANON_KEY = "CeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3plem5iem5vcG11cGlnZnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODMxOTAsImV4cCI6MjA5NDQ1OTE5MH0.wr7B1BClyxhN0IrmlcGycN5vatE51311LNYvTwLEY_I";
 
 const PASSWORD = "atos1";
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let hinos = [];
 let currentHino = null;
@@ -20,23 +21,28 @@ function checkPassword() {
 }
 
 async function loadHinos() {
-  const { data, error } = await supabase
+  const { data, error } = await supabaseClient
     .from("hinos")
     .select("*")
     .order("created_at", { ascending: true });
 
   if (error) {
-    alert("Erro ao carregar hinos.");
+    alert("Erro ao carregar hinos: " + error.message);
     console.error(error);
     return;
   }
 
-  hinos = data;
+  hinos = data || [];
   renderHinos();
 }
 
 function renderHinos() {
   hinosList.innerHTML = "";
+
+  if (hinos.length === 0) {
+    hinosList.innerHTML = "<p>Nenhum hino cadastrado ainda.</p>";
+    return;
+  }
 
   hinos.forEach((hino) => {
     const div = document.createElement("div");
@@ -75,23 +81,28 @@ async function addHino() {
   const title = prompt("Digite o título do novo hino:");
 
   if (!title || title.trim() === "") {
-    alert("Título inválido.");
+    alert("Digite um título válido.");
     return;
   }
 
-  const { error } = await supabase.from("hinos").insert({
-    title: title.trim(),
-    lyrics: "Digite aqui a letra do hino...",
-    color: "#222222",
-    font_size: 20
-  });
+  const { error } = await supabaseClient
+    .from("hinos")
+    .insert([
+      {
+        title: title.trim(),
+        lyrics: "Digite aqui a letra do hino...",
+        color: "#222222",
+        font_size: 20
+      }
+    ]);
 
   if (error) {
-    alert("Erro ao criar hino.");
+    alert("Erro ao criar hino: " + error.message);
     console.error(error);
     return;
   }
 
+  alert("Hino criado com sucesso.");
   loadHinos();
 }
 
@@ -116,7 +127,7 @@ async function saveHino() {
   const fontSize = parseInt(hinoLyrics.style.fontSize) || 20;
   const color = hinoLyrics.style.color || "#222222";
 
-  const { error } = await supabase
+  const { error } = await supabaseClient
     .from("hinos")
     .update({
       lyrics: hinoLyrics.value,
@@ -126,7 +137,7 @@ async function saveHino() {
     .eq("id", currentHino.id);
 
   if (error) {
-    alert("Erro ao salvar hino.");
+    alert("Erro ao salvar hino: " + error.message);
     console.error(error);
     return;
   }
@@ -135,7 +146,7 @@ async function saveHino() {
   alert("Hino salvo com sucesso.");
 }
 
-async function changeColor() {
+function changeColor() {
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
@@ -160,5 +171,13 @@ function decreaseFont() {
     hinoLyrics.style.fontSize = currentSize - 2 + "px";
   }
 }
+
+window.addHino = addHino;
+window.goHome = goHome;
+window.enableEdit = enableEdit;
+window.saveHino = saveHino;
+window.changeColor = changeColor;
+window.increaseFont = increaseFont;
+window.decreaseFont = decreaseFont;
 
 loadHinos();
