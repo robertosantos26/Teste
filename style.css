@@ -93,6 +93,11 @@ main {
   cursor: pointer;
 }
 
+.edit-bar button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 textarea {
   width: 100%;
   min-height: 420px;
