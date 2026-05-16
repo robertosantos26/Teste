@@ -1,14 +1,12 @@
+const SUPABASE_URL = "COLE_AQUI_SUA_SUPABASE_URL";
+const SUPABASE_ANON_KEY = "COLE_AQUI_SUA_SUPABASE_ANON_KEY";
+
 const PASSWORD = "atos1";
 
-let hinos = JSON.parse(localStorage.getItem("hinos")) || [
-  {
-    title: "Exemplo de Hino",
-    lyrics: "Digite aqui a letra do hino..."
-  }
-];
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let currentHinoIndex = null;
-let fontSize = 20;
+let hinos = [];
+let currentHino = null;
 
 const homePage = document.getElementById("homePage");
 const hinoPage = document.getElementById("hinoPage");
@@ -17,31 +15,45 @@ const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
 
 function checkPassword() {
-  const senha = prompt("Digite a senha para editar:");
+  const senha = prompt("Digite a senha:");
   return senha === PASSWORD;
 }
 
-function saveToStorage() {
-  localStorage.setItem("hinos", JSON.stringify(hinos));
+async function loadHinos() {
+  const { data, error } = await supabase
+    .from("hinos")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    alert("Erro ao carregar hinos.");
+    console.error(error);
+    return;
+  }
+
+  hinos = data;
+  renderHinos();
 }
 
 function renderHinos() {
   hinosList.innerHTML = "";
 
-  hinos.forEach((hino, index) => {
+  hinos.forEach((hino) => {
     const div = document.createElement("div");
     div.className = "hino-item";
     div.textContent = hino.title;
-    div.onclick = () => openHino(index);
+    div.onclick = () => openHino(hino);
     hinosList.appendChild(div);
   });
 }
 
-function openHino(index) {
-  currentHinoIndex = index;
+function openHino(hino) {
+  currentHino = hino;
 
-  hinoTitle.textContent = hinos[index].title;
-  hinoLyrics.value = hinos[index].lyrics;
+  hinoTitle.textContent = hino.title;
+  hinoLyrics.value = hino.lyrics || "";
+  hinoLyrics.style.color = hino.color || "#222222";
+  hinoLyrics.style.fontSize = (hino.font_size || 20) + "px";
   hinoLyrics.disabled = true;
 
   homePage.classList.add("hidden");
@@ -51,10 +63,10 @@ function openHino(index) {
 function goHome() {
   hinoPage.classList.add("hidden");
   homePage.classList.remove("hidden");
-  renderHinos();
+  loadHinos();
 }
 
-function addHino() {
+async function addHino() {
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
@@ -67,13 +79,20 @@ function addHino() {
     return;
   }
 
-  hinos.push({
+  const { error } = await supabase.from("hinos").insert({
     title: title.trim(),
-    lyrics: "Digite aqui a letra do hino..."
+    lyrics: "Digite aqui a letra do hino...",
+    color: "#222222",
+    font_size: 20
   });
 
-  saveToStorage();
-  renderHinos();
+  if (error) {
+    alert("Erro ao criar hino.");
+    console.error(error);
+    return;
+  }
+
+  loadHinos();
 }
 
 function enableEdit() {
@@ -86,28 +105,43 @@ function enableEdit() {
   hinoLyrics.focus();
 }
 
-function saveHino() {
-  if (currentHinoIndex === null) return;
+async function saveHino() {
+  if (!currentHino) return;
 
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
   }
 
-  hinos[currentHinoIndex].lyrics = hinoLyrics.value;
-  saveToStorage();
+  const fontSize = parseInt(hinoLyrics.style.fontSize) || 20;
+  const color = hinoLyrics.style.color || "#222222";
+
+  const { error } = await supabase
+    .from("hinos")
+    .update({
+      lyrics: hinoLyrics.value,
+      color: color,
+      font_size: fontSize
+    })
+    .eq("id", currentHino.id);
+
+  if (error) {
+    alert("Erro ao salvar hino.");
+    console.error(error);
+    return;
+  }
 
   hinoLyrics.disabled = true;
   alert("Hino salvo com sucesso.");
 }
 
-function changeColor() {
+async function changeColor() {
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
   }
 
-  const color = prompt("Digite a cor da letra. Exemplo: red, blue, green ou #000000");
+  const color = prompt("Digite a cor. Exemplo: red, blue, green ou #000000");
 
   if (color) {
     hinoLyrics.style.color = color;
@@ -115,15 +149,16 @@ function changeColor() {
 }
 
 function increaseFont() {
-  fontSize += 2;
-  hinoLyrics.style.fontSize = fontSize + "px";
+  const currentSize = parseInt(hinoLyrics.style.fontSize) || 20;
+  hinoLyrics.style.fontSize = currentSize + 2 + "px";
 }
 
 function decreaseFont() {
-  if (fontSize > 12) {
-    fontSize -= 2;
-    hinoLyrics.style.fontSize = fontSize + "px";
+  const currentSize = parseInt(hinoLyrics.style.fontSize) || 20;
+
+  if (currentSize > 12) {
+    hinoLyrics.style.fontSize = currentSize - 2 + "px";
   }
 }
 
-renderHinos();
+loadHinos();
