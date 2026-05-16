@@ -1,6 +1,6 @@
 const SUPABASE_URL = "https://xqwzeznbznopmupigfuz.supabase.co";
 
-const SUPABASE_ANON_KEY = "CeyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhxd3plem5iem5vcG11cGlnZnV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg4ODMxOTAsImV4cCI6MjA5NDQ1OTE5MH0.wr7B1BClyxhN0IrmlcGycN5vatE51311LNYvTwLEY_I";
+const SUPABASE_ANON_KEY = "sb_publishable_yRqdQszi8m3rV4ybrZnysw_j6N1_uWH";
 
 const PASSWORD = "atos1";
 
