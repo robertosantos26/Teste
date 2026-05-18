@@ -77,14 +77,19 @@ main {
   cursor: pointer;
 }
 
-.edit-bar {
+.hino-header {
   display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 15px 0;
 }
 
-.edit-bar button {
+#hinoTitle {
+  margin: 0;
+}
+
+.hino-header button {
   background: #1f4f3a;
   color: white;
   border: none;
