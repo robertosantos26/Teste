@@ -16,10 +16,6 @@ const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
 const editTools = document.getElementById("editTools");
 const editBtn = document.getElementById("editBtn");
-const colorBtn = document.getElementById("colorBtn");
-const increaseFontBtn = document.getElementById("increaseFontBtn");
-const decreaseFontBtn = document.getElementById("decreaseFontBtn");
-const saveBtn = document.getElementById("saveBtn");
 
 let isEditMode = false;
 
@@ -27,7 +23,7 @@ function setEditMode(enabled) {
   isEditMode = enabled;
   hinoLyrics.contentEditable = enabled ? "true" : "false";
   editTools.classList.toggle("hidden", !enabled);
-  editBtn.textContent = enabled ? "Editando" : "Editar";
+  editBtn.textContent = enabled ? "✏️ Editando" : "✏️ Editar";
 }
 
 function checkPassword() {
