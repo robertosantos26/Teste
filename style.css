@@ -93,6 +93,10 @@ main {
   cursor: pointer;
 }
 
+.edit-icon-btn {
+  font-weight: 600;
+}
+
 .edit-tools {
   display: flex;
   flex-wrap: wrap;
