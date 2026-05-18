@@ -32,10 +32,19 @@
       </div>
 
       <div id="editTools" class="edit-tools hidden">
-        <button id="colorBtn" onclick="changeColor()">Cor da letra</button>
+        <button id="colorBtn" onclick="toggleColorPalette()">Cor da letra</button>
         <button id="increaseFontBtn" onclick="increaseFont()">A+</button>
         <button id="decreaseFontBtn" onclick="decreaseFont()">A-</button>
         <button id="saveBtn" onclick="saveHino()">Salvar</button>
+      </div>
+      <div id="colorPalette" class="color-palette hidden">
+        <button class="color-swatch" style="background:#d32f2f" onclick="applySelectedColor('#d32f2f')" title="Vermelho"></button>
+        <button class="color-swatch" style="background:#f57c00" onclick="applySelectedColor('#f57c00')" title="Laranja"></button>
+        <button class="color-swatch" style="background:#fbc02d" onclick="applySelectedColor('#fbc02d')" title="Amarelo"></button>
+        <button class="color-swatch" style="background:#388e3c" onclick="applySelectedColor('#388e3c')" title="Verde"></button>
+        <button class="color-swatch" style="background:#1976d2" onclick="applySelectedColor('#1976d2')" title="Azul"></button>
+        <button class="color-swatch" style="background:#7b1fa2" onclick="applySelectedColor('#7b1fa2')" title="Roxo"></button>
+        <button class="color-swatch" style="background:#000000" onclick="applySelectedColor('#000000')" title="Preto"></button>
       </div>
 
       <div id="hinoLyrics" class="hino-lyrics" contenteditable="false"></div>

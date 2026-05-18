@@ -16,6 +16,7 @@ const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
 const editTools = document.getElementById("editTools");
 const editBtn = document.getElementById("editBtn");
+const colorPalette = document.getElementById("colorPalette");
 
 let isEditMode = false;
 
@@ -23,6 +24,7 @@ function setEditMode(enabled) {
   isEditMode = enabled;
   hinoLyrics.contentEditable = enabled ? "true" : "false";
   editTools.classList.toggle("hidden", !enabled);
+  colorPalette.classList.add("hidden");
   editBtn.textContent = enabled ? "✏️ Editando" : "✏️ Editar";
 }
 
@@ -68,7 +70,7 @@ function openHino(hino) {
   currentHino = hino;
 
   hinoTitle.textContent = hino.title;
-  hinoLyrics.textContent = hino.lyrics || "";
+  hinoLyrics.innerHTML = hino.lyrics || "";
   hinoLyrics.style.color = hino.color || "#222222";
   hinoLyrics.style.fontSize = (hino.font_size || 20) + "px";
   setEditMode(false);
@@ -148,7 +150,7 @@ async function saveHino() {
   const { error } = await supabaseClient
     .from("hinos")
     .update({
-      lyrics: hinoLyrics.innerText,
+      lyrics: hinoLyrics.innerHTML,
       color: color,
       font_size: fontSize
     })
@@ -164,17 +166,42 @@ async function saveHino() {
   alert("Hino salvo com sucesso.");
 }
 
-function changeColor() {
+function toggleColorPalette() {
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
+    return;
+  }
+  colorPalette.classList.toggle("hidden");
+}
+
+function applySelectedColor(color) {
   if (!isEditMode) {
     alert("Clique em Editar para liberar as ferramentas.");
     return;
   }
 
-  const color = prompt("Digite a cor. Exemplo: red, blue, green ou #000000");
+  const selection = window.getSelection();
 
-  if (color) {
-    hinoLyrics.style.color = color;
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    alert("Selecione um trecho do texto para aplicar a cor.");
+    return;
   }
+
+  const range = selection.getRangeAt(0);
+
+  if (!hinoLyrics.contains(range.commonAncestorContainer)) {
+    alert("Selecione um trecho dentro da letra do hino.");
+    return;
+  }
+
+  const selectedContent = range.extractContents();
+  const span = document.createElement("span");
+  span.style.color = color;
+  span.appendChild(selectedContent);
+  range.insertNode(span);
+
+  selection.removeAllRanges();
+  colorPalette.classList.add("hidden");
 }
 
 function increaseFont() {
@@ -204,7 +231,8 @@ window.addHino = addHino;
 window.goHome = goHome;
 window.enableEdit = enableEdit;
 window.saveHino = saveHino;
-window.changeColor = changeColor;
+window.toggleColorPalette = toggleColorPalette;
+window.applySelectedColor = applySelectedColor;
 window.increaseFont = increaseFont;
 window.decreaseFont = decreaseFont;
 

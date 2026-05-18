@@ -118,6 +118,27 @@ main {
   cursor: pointer;
 }
 
+.edit-tools.hidden,
+.color-palette.hidden {
+  display: none;
+}
+
+.color-palette {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.color-swatch {
+  width: 30px;
+  height: 30px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+  cursor: pointer;
+}
+
 .hino-lyrics {
   width: 100%;
   min-height: 420px;
