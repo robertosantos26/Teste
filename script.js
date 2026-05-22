@@ -1,13 +1,14 @@
 const SUPABASE_URL = "https://xqwzeznbznopmupigfuz.supabase.co";
-
 const SUPABASE_ANON_KEY = "sb_publishable_yRqdQszi8m3rV4ybrZnysw_j6N1_uWH";
-
 const PASSWORD = "atos1";
+
+const HINOS_CACHE_KEY = "hinos_cache_v1";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let hinos = [];
 let currentHino = null;
+let isUsingOfflineCache = false;
 
 const homePage = document.getElementById("homePage");
 const hinoPage = document.getElementById("hinoPage");
@@ -17,6 +18,7 @@ const hinoLyrics = document.getElementById("hinoLyrics");
 const editTools = document.getElementById("editTools");
 const editBtn = document.getElementById("editBtn");
 const colorPalette = document.getElementById("colorPalette");
+const connectionStatus = document.getElementById("connectionStatus");
 
 let isEditMode = false;
 
@@ -26,6 +28,31 @@ function setEditMode(enabled) {
   editTools.classList.toggle("hidden", !enabled);
   colorPalette.classList.add("hidden");
   editBtn.textContent = enabled ? "✏️ Editando" : "✏️ Editar";
+}
+
+function updateConnectionStatus() {
+  const online = navigator.onLine;
+  if (online) {
+    connectionStatus.textContent = "🟢 Online";
+  } else {
+    connectionStatus.textContent = "🟠 Offline (dados podem estar desatualizados)";
+  }
+}
+
+function saveHinosToCache(data) {
+  localStorage.setItem(HINOS_CACHE_KEY, JSON.stringify(data || []));
+}
+
+function loadHinosFromCache() {
+  const raw = localStorage.getItem(HINOS_CACHE_KEY);
+  if (!raw) return [];
+
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error("Erro ao ler cache local:", err);
+    return [];
+  }
 }
 
 function checkPassword() {
@@ -40,20 +67,42 @@ async function loadHinos() {
     .order("created_at", { ascending: true });
 
   if (error) {
-    alert("Erro ao carregar hinos: " + error.message);
+    console.warn("Falha online, tentando cache local:", error.message);
+
+    const cachedHinos = loadHinosFromCache();
+    if (cachedHinos.length > 0) {
+      isUsingOfflineCache = true;
+      hinos = cachedHinos;
+      renderHinos();
+      return;
+    }
+
+    alert("Erro ao carregar hinos e nenhum cache local disponível.");
     console.error(error);
     return;
   }
 
+  isUsingOfflineCache = false;
   hinos = data || [];
+  saveHinosToCache(hinos);
   renderHinos();
 }
 
 function renderHinos() {
   hinosList.innerHTML = "";
 
+  if (isUsingOfflineCache) {
+    const offlineMsg = document.createElement("p");
+    offlineMsg.textContent = "Você está vendo dados salvos no aparelho (modo offline parcial).";
+    offlineMsg.style.background = "#fff3cd";
+    offlineMsg.style.color = "#6b4f00";
+    offlineMsg.style.padding = "10px";
+    offlineMsg.style.borderRadius = "8px";
+    hinosList.appendChild(offlineMsg);
+  }
+
   if (hinos.length === 0) {
-    hinosList.innerHTML = "<p>Nenhum hino cadastrado ainda.</p>";
+    hinosList.innerHTML += "<p>Nenhum hino cadastrado ainda.</p>";
     return;
   }
 
@@ -87,6 +136,11 @@ function goHome() {
 }
 
 async function addHino() {
+  if (!navigator.onLine) {
+    alert("Você está offline. Para criar novo hino, conecte-se à internet.");
+    return;
+  }
+
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
@@ -138,6 +192,11 @@ function enableEdit() {
 }
 
 async function saveHino() {
+  if (!navigator.onLine) {
+    alert("Você está offline. Para salvar no servidor, conecte-se à internet.");
+    return;
+  }
+
   if (!currentHino) return;
   if (!isEditMode) {
     alert("Clique em Editar para liberar as ferramentas.");
@@ -164,6 +223,7 @@ async function saveHino() {
 
   setEditMode(false);
   alert("Hino salvo com sucesso.");
+  loadHinos();
 }
 
 function toggleColorPalette() {
@@ -227,6 +287,22 @@ function decreaseFont() {
   }
 }
 
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
+  try {
+    await navigator.serviceWorker.register("./sw.js");
+  } catch (error) {
+    console.error("Falha ao registrar Service Worker:", error);
+  }
+}
+
+window.addEventListener("online", () => {
+  updateConnectionStatus();
+  loadHinos();
+});
+window.addEventListener("offline", updateConnectionStatus);
+
 window.addHino = addHino;
 window.goHome = goHome;
 window.enableEdit = enableEdit;
@@ -236,4 +312,6 @@ window.applySelectedColor = applySelectedColor;
 window.increaseFont = increaseFont;
 window.decreaseFont = decreaseFont;
 
+updateConnectionStatus();
+registerServiceWorker();
 loadHinos();
