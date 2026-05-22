@@ -20,6 +20,42 @@ const editBtn = document.getElementById("editBtn");
 const colorPalette = document.getElementById("colorPalette");
 const connectionStatus = document.getElementById("connectionStatus");
 
+const installBtn = document.getElementById("installBtn");
+const iosInstallHint = document.getElementById("iosInstallHint");
+
+let deferredInstallPrompt = null;
+
+function isIosDevice() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function isInStandaloneMode() {
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function setupInstallExperience() {
+  if (isInStandaloneMode()) return;
+
+  if (isIosDevice()) {
+    iosInstallHint.textContent = "No iPhone/iPad: toque em Compartilhar e depois em 'Adicionar à Tela de Início'.";
+    iosInstallHint.classList.remove("hidden");
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installBtn.classList.remove("hidden");
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    installBtn.classList.add("hidden");
+  });
+}
+
 let isEditMode = false;
 
 function setEditMode(enabled) {
@@ -325,4 +361,5 @@ window.decreaseFont = decreaseFont;
 
 updateConnectionStatus();
 registerServiceWorker();
+setupInstallExperience();
 loadHinos();

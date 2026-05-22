@@ -20,3 +20,10 @@ Aplicação web simples para listar, criar e editar hinos com dados salvos no Su
 - `manifest.webmanifest`: metadados de instalação.
 - `sw.js`: Service Worker e cache de assets.
 - `icons/icon.svg`: ícone vetorial da instalação (compatível com diff em texto no Codex).
+
+
+## Instalar no Android e iOS
+
+- **Android (Chrome/Edge):** abra o app e toque em **Instalar app** quando o botão aparecer.
+- **iOS (Safari):** toque em **Compartilhar** e depois em **Adicionar à Tela de Início**.
+- Após instalar, o app abre em modo standalone e continua com suporte a offline parcial.
