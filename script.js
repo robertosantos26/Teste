@@ -34,25 +34,32 @@ function isInStandaloneMode() {
 }
 
 function setupInstallExperience() {
-  if (isInStandaloneMode()) return;
-
-  if (isIosDevice()) {
-    iosInstallHint.textContent = "No iPhone/iPad: toque em Compartilhar e depois em 'Adicionar à Tela de Início'.";
-    iosInstallHint.classList.remove("hidden");
+  if (isInStandaloneMode()) {
+    installBtn.classList.add("hidden");
+    iosInstallHint.classList.add("hidden");
+    return;
   }
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
-    installBtn.classList.remove("hidden");
   });
 
   installBtn.addEventListener("click", async () => {
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    installBtn.classList.add("hidden");
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      return;
+    }
+
+    if (isIosDevice()) {
+      iosInstallHint.textContent = "No iPhone/iPad: toque em Compartilhar e depois em 'Adicionar à Tela de Início'.";
+      iosInstallHint.classList.remove("hidden");
+      return;
+    }
+
+    alert("Para instalar: abra o menu do navegador e toque em 'Instalar app' ou 'Adicionar à tela inicial'.");
   });
 }
 
