@@ -39,6 +39,13 @@ function updateConnectionStatus() {
   }
 }
 
+function showInfoMessage(text, type = "info") {
+  const banner = document.createElement("p");
+  banner.className = `info-banner info-banner-${type}`;
+  banner.textContent = text;
+  hinosList.appendChild(banner);
+}
+
 function saveHinosToCache(data) {
   localStorage.setItem(HINOS_CACHE_KEY, JSON.stringify(data || []));
 }
@@ -61,6 +68,8 @@ function checkPassword() {
 }
 
 async function loadHinos() {
+  hinosList.innerHTML = "";
+
   const { data, error } = await supabaseClient
     .from("hinos")
     .select("*")
@@ -77,8 +86,9 @@ async function loadHinos() {
       return;
     }
 
-    alert("Erro ao carregar hinos e nenhum cache local disponível.");
-    console.error(error);
+    isUsingOfflineCache = true;
+    hinos = [];
+    renderHinos("Sem internet e sem dados salvos neste aparelho. Abra o app online ao menos 1 vez para ativar o offline parcial.", "warning");
     return;
   }
 
@@ -88,21 +98,19 @@ async function loadHinos() {
   renderHinos();
 }
 
-function renderHinos() {
+function renderHinos(customMessage = "", customType = "info") {
   hinosList.innerHTML = "";
 
   if (isUsingOfflineCache) {
-    const offlineMsg = document.createElement("p");
-    offlineMsg.textContent = "Você está vendo dados salvos no aparelho (modo offline parcial).";
-    offlineMsg.style.background = "#fff3cd";
-    offlineMsg.style.color = "#6b4f00";
-    offlineMsg.style.padding = "10px";
-    offlineMsg.style.borderRadius = "8px";
-    hinosList.appendChild(offlineMsg);
+    showInfoMessage("Você está vendo dados salvos no aparelho (modo offline parcial).", "warning");
+  }
+
+  if (customMessage) {
+    showInfoMessage(customMessage, customType);
   }
 
   if (hinos.length === 0) {
-    hinosList.innerHTML += "<p>Nenhum hino cadastrado ainda.</p>";
+    showInfoMessage("Nenhum hino cadastrado ainda.", "muted");
     return;
   }
 
@@ -301,7 +309,10 @@ window.addEventListener("online", () => {
   updateConnectionStatus();
   loadHinos();
 });
-window.addEventListener("offline", updateConnectionStatus);
+window.addEventListener("offline", () => {
+  updateConnectionStatus();
+  loadHinos();
+});
 
 window.addHino = addHino;
 window.goHome = goHome;

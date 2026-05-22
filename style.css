@@ -147,3 +147,28 @@ main {
   line-height: 1.6;
   white-space: pre-wrap;
 }
+
+#connectionStatus {
+  font-weight: 600;
+}
+
+.info-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.info-banner-warning {
+  background: #fff3cd;
+  color: #6b4f00;
+}
+
+.info-banner-muted {
+  background: #eef1f4;
+  color: #4f5b66;
+}
+
+.info-banner-info {
+  background: #e7f4ff;
+  color: #0b4f79;
+}
