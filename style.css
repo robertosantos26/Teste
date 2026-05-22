@@ -147,3 +147,60 @@ main {
   line-height: 1.6;
   white-space: pre-wrap;
 }
+
+#connectionStatus {
+  font-weight: 600;
+}
+
+.info-banner {
+  margin: 0 0 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+}
+
+.info-banner-warning {
+  background: #fff3cd;
+  color: #6b4f00;
+}
+
+.info-banner-muted {
+  background: #eef1f4;
+  color: #4f5b66;
+}
+
+.info-banner-info {
+  background: #e7f4ff;
+  color: #0b4f79;
+}
+
+
+.install-actions {
+  margin-top: 10px;
+}
+
+.install-btn {
+  background: #ffffff;
+  color: #1f4f3a;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.install-hint {
+  margin: 8px 0 0;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+
+.install-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#installStatus {
+  max-width: 480px;
+}
