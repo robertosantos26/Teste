@@ -1,13 +1,14 @@
 const SUPABASE_URL = "https://xqwzeznbznopmupigfuz.supabase.co";
-
 const SUPABASE_ANON_KEY = "sb_publishable_yRqdQszi8m3rV4ybrZnysw_j6N1_uWH";
-
 const PASSWORD = "atos1";
+
+const HINOS_CACHE_KEY = "hinos_cache_v1";
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let hinos = [];
 let currentHino = null;
+let isUsingOfflineCache = false;
 
 const homePage = document.getElementById("homePage");
 const hinoPage = document.getElementById("hinoPage");
@@ -17,6 +18,71 @@ const hinoLyrics = document.getElementById("hinoLyrics");
 const editTools = document.getElementById("editTools");
 const editBtn = document.getElementById("editBtn");
 const colorPalette = document.getElementById("colorPalette");
+const connectionStatus = document.getElementById("connectionStatus");
+
+const installBtn = document.getElementById("installBtn");
+const iosInstallHint = document.getElementById("iosInstallHint");
+const installStatus = document.getElementById("installStatus");
+
+let deferredInstallPrompt = null;
+
+function isIosDevice() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+
+function isInStandaloneMode() {
+  return window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+}
+
+function setupInstallExperience() {
+  if (isInStandaloneMode()) {
+    installBtn.classList.add("hidden");
+    iosInstallHint.classList.add("hidden");
+    installStatus.classList.add("hidden");
+    return;
+  }
+
+  const isIos = isIosDevice();
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  installStatus.classList.remove("hidden");
+  if (isIos) {
+    installStatus.textContent = "No iPhone/iPad, o iOS exige instalação manual pelo Safari.";
+  } else if (isAndroid) {
+    installStatus.textContent = "No Android, toque em 'Baixar app' para tentar instalação automática.";
+  } else {
+    installStatus.textContent = "Se não abrir automático, use o menu do navegador para instalar.";
+  }
+
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    installStatus.textContent = "Pronto! Toque em 'Baixar app' para instalar.";
+  });
+
+  installBtn.addEventListener("click", async () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      if (choice.outcome === "accepted") {
+        installStatus.textContent = "Instalação iniciada com sucesso.";
+      } else {
+        installStatus.textContent = "Instalação cancelada. Você pode tentar novamente.";
+      }
+      return;
+    }
+
+    if (isIos) {
+      iosInstallHint.textContent = "Safari: Compartilhar → Adicionar à Tela de Início.";
+      iosInstallHint.classList.remove("hidden");
+      installStatus.textContent = "No iOS não existe instalação 100% automática por botão.";
+      return;
+    }
+
+    installStatus.textContent = "Seu navegador não liberou o instalador automático agora. Abra o menu (⋮) e toque em 'Instalar app' ou 'Adicionar à tela inicial'.";
+  });
+}
 
 let isEditMode = false;
 
@@ -28,32 +94,87 @@ function setEditMode(enabled) {
   editBtn.textContent = enabled ? "✏️ Editando" : "✏️ Editar";
 }
 
+function updateConnectionStatus() {
+  const online = navigator.onLine;
+  if (online) {
+    connectionStatus.textContent = "🟢 Online";
+  } else {
+    connectionStatus.textContent = "🟠 Offline (dados podem estar desatualizados)";
+  }
+}
+
+function showInfoMessage(text, type = "info") {
+  const banner = document.createElement("p");
+  banner.className = `info-banner info-banner-${type}`;
+  banner.textContent = text;
+  hinosList.appendChild(banner);
+}
+
+function saveHinosToCache(data) {
+  localStorage.setItem(HINOS_CACHE_KEY, JSON.stringify(data || []));
+}
+
+function loadHinosFromCache() {
+  const raw = localStorage.getItem(HINOS_CACHE_KEY);
+  if (!raw) return [];
+
+  try {
+    return JSON.parse(raw);
+  } catch (err) {
+    console.error("Erro ao ler cache local:", err);
+    return [];
+  }
+}
+
 function checkPassword() {
   const senha = prompt("Digite a senha:");
   return senha === PASSWORD;
 }
 
 async function loadHinos() {
+  hinosList.innerHTML = "";
+
   const { data, error } = await supabaseClient
     .from("hinos")
     .select("*")
     .order("created_at", { ascending: true });
 
   if (error) {
-    alert("Erro ao carregar hinos: " + error.message);
-    console.error(error);
+    console.warn("Falha online, tentando cache local:", error.message);
+
+    const cachedHinos = loadHinosFromCache();
+    if (cachedHinos.length > 0) {
+      isUsingOfflineCache = true;
+      hinos = cachedHinos;
+      renderHinos();
+      return;
+    }
+
+    isUsingOfflineCache = true;
+    hinos = [];
+    renderHinos("Sem internet e sem dados salvos neste aparelho. Abra o app online ao menos 1 vez para ativar o offline parcial.", "warning");
     return;
   }
 
+  isUsingOfflineCache = false;
   hinos = data || [];
+  saveHinosToCache(hinos);
   renderHinos();
 }
 
-function renderHinos() {
+function renderHinos(customMessage = "", customType = "info") {
   hinosList.innerHTML = "";
 
+  if (isUsingOfflineCache) {
+    showInfoMessage("Você está vendo dados salvos no aparelho (modo offline parcial).", "warning");
+  }
+
+  if (customMessage) {
+    showInfoMessage(customMessage, customType);
+  }
+
   if (hinos.length === 0) {
-    hinosList.innerHTML = "<p>Nenhum hino cadastrado ainda.</p>";
+    showInfoMessage("Nenhum hino cadastrado ainda.", "muted");
     return;
   }
 
@@ -87,6 +208,11 @@ function goHome() {
 }
 
 async function addHino() {
+  if (!navigator.onLine) {
+    alert("Você está offline. Para criar novo hino, conecte-se à internet.");
+    return;
+  }
+
   if (!checkPassword()) {
     alert("Senha incorreta.");
     return;
@@ -138,6 +264,11 @@ function enableEdit() {
 }
 
 async function saveHino() {
+  if (!navigator.onLine) {
+    alert("Você está offline. Para salvar no servidor, conecte-se à internet.");
+    return;
+  }
+
   if (!currentHino) return;
   if (!isEditMode) {
     alert("Clique em Editar para liberar as ferramentas.");
@@ -164,6 +295,7 @@ async function saveHino() {
 
   setEditMode(false);
   alert("Hino salvo com sucesso.");
+  loadHinos();
 }
 
 function toggleColorPalette() {
@@ -227,6 +359,25 @@ function decreaseFont() {
   }
 }
 
+async function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+
+  try {
+    await navigator.serviceWorker.register("./sw.js");
+  } catch (error) {
+    console.error("Falha ao registrar Service Worker:", error);
+  }
+}
+
+window.addEventListener("online", () => {
+  updateConnectionStatus();
+  loadHinos();
+});
+window.addEventListener("offline", () => {
+  updateConnectionStatus();
+  loadHinos();
+});
+
 window.addHino = addHino;
 window.goHome = goHome;
 window.enableEdit = enableEdit;
@@ -236,4 +387,7 @@ window.applySelectedColor = applySelectedColor;
 window.increaseFont = increaseFont;
 window.decreaseFont = decreaseFont;
 
+updateConnectionStatus();
+registerServiceWorker();
+setupInstallExperience();
 loadHinos();
