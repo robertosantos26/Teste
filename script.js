@@ -22,6 +22,7 @@ const connectionStatus = document.getElementById("connectionStatus");
 
 const installBtn = document.getElementById("installBtn");
 const iosInstallHint = document.getElementById("iosInstallHint");
+const installStatus = document.getElementById("installStatus");
 
 let deferredInstallPrompt = null;
 
@@ -37,29 +38,49 @@ function setupInstallExperience() {
   if (isInStandaloneMode()) {
     installBtn.classList.add("hidden");
     iosInstallHint.classList.add("hidden");
+    installStatus.classList.add("hidden");
     return;
+  }
+
+  const isIos = isIosDevice();
+  const isAndroid = /android/i.test(navigator.userAgent);
+
+  installStatus.classList.remove("hidden");
+  if (isIos) {
+    installStatus.textContent = "No iPhone/iPad, o iOS exige instalação manual pelo Safari.";
+  } else if (isAndroid) {
+    installStatus.textContent = "No Android, toque em 'Baixar app' para tentar instalação automática.";
+  } else {
+    installStatus.textContent = "Se não abrir automático, use o menu do navegador para instalar.";
   }
 
   window.addEventListener("beforeinstallprompt", (event) => {
     event.preventDefault();
     deferredInstallPrompt = event;
+    installStatus.textContent = "Pronto! Toque em 'Baixar app' para instalar.";
   });
 
   installBtn.addEventListener("click", async () => {
     if (deferredInstallPrompt) {
       deferredInstallPrompt.prompt();
-      await deferredInstallPrompt.userChoice;
+      const choice = await deferredInstallPrompt.userChoice;
       deferredInstallPrompt = null;
+      if (choice.outcome === "accepted") {
+        installStatus.textContent = "Instalação iniciada com sucesso.";
+      } else {
+        installStatus.textContent = "Instalação cancelada. Você pode tentar novamente.";
+      }
       return;
     }
 
-    if (isIosDevice()) {
-      iosInstallHint.textContent = "No iPhone/iPad: toque em Compartilhar e depois em 'Adicionar à Tela de Início'.";
+    if (isIos) {
+      iosInstallHint.textContent = "Safari: Compartilhar → Adicionar à Tela de Início.";
       iosInstallHint.classList.remove("hidden");
+      installStatus.textContent = "No iOS não existe instalação 100% automática por botão.";
       return;
     }
 
-    alert("Para instalar: abra o menu do navegador e toque em 'Instalar app' ou 'Adicionar à tela inicial'.");
+    installStatus.textContent = "Seu navegador não liberou o instalador automático agora. Abra o menu (⋮) e toque em 'Instalar app' ou 'Adicionar à tela inicial'.";
   });
 }
 
