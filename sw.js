@@ -1,4 +1,4 @@
-const CACHE_NAME = "hinos-pwa-v1";
+const CACHE_NAME = "hinos-pwa-v2";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
@@ -6,6 +6,14 @@ const ASSETS_TO_CACHE = [
   "./script.js",
   "./manifest.webmanifest"
 ];
+
+function isSupabaseRequest(url) {
+  return url.hostname.endsWith(".supabase.co");
+}
+
+function isSameOriginRequest(url) {
+  return url.origin === self.location.origin;
+}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -29,6 +37,20 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+
+  const requestUrl = new URL(event.request.url);
+
+  if (isSupabaseRequest(requestUrl)) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  if (!isSameOriginRequest(requestUrl)) {
+    event.respondWith(
+      fetch(event.request).catch(() => caches.match(event.request))
+    );
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
