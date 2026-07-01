@@ -9,7 +9,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let hinos = [];
 let currentHino = null;
 let isUsingOfflineCache = false;
-let canPersistCardColor = true;
+let canPersistCardColor = false;
 
 const homePage = document.getElementById("homePage");
 const hinoPage = document.getElementById("hinoPage");
@@ -220,6 +220,7 @@ async function loadHinos() {
 
   isUsingOfflineCache = false;
   hinos = data || [];
+  canPersistCardColor = hinos.some((hino) => Object.prototype.hasOwnProperty.call(hino, "card_color"));
   saveHinosToCache(hinos);
   renderHinos();
 }
