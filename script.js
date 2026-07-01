@@ -9,6 +9,7 @@ const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let hinos = [];
 let currentHino = null;
 let isUsingOfflineCache = false;
+let canPersistCardColor = false;
 
 const homePage = document.getElementById("homePage");
 const hinoPage = document.getElementById("hinoPage");
@@ -146,6 +147,52 @@ function checkPassword() {
   return senha === PASSWORD;
 }
 
+function isMissingCardColorColumnError(error) {
+  if (!error) return false;
+
+  const message = `${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
+
+  return message.includes("card_color") && (
+    message.includes("schema cache") ||
+    message.includes("column") ||
+    error.code === "PGRST204"
+  );
+}
+
+function buildHinoPayload({ title, lyrics, color, fontSize, cardColor }, includeCardColor = canPersistCardColor) {
+  const payload = {
+    title,
+    lyrics,
+    color,
+    font_size: fontSize
+  };
+
+  if (includeCardColor) {
+    payload.card_color = cardColor;
+  }
+
+  return payload;
+}
+
+async function saveHinoRecord(id, payload) {
+  let { error } = await supabaseClient
+    .from("hinos")
+    .update(payload)
+    .eq("id", id);
+
+  if (isMissingCardColorColumnError(error) && Object.prototype.hasOwnProperty.call(payload, "card_color")) {
+    canPersistCardColor = false;
+    const { card_color: _cardColor, ...payloadWithoutCardColor } = payload;
+
+    ({ error } = await supabaseClient
+      .from("hinos")
+      .update(payloadWithoutCardColor)
+      .eq("id", id));
+  }
+
+  return error;
+}
+
 async function loadHinos() {
   hinosList.innerHTML = "";
 
@@ -173,6 +220,7 @@ async function loadHinos() {
 
   isUsingOfflineCache = false;
   hinos = data || [];
+  canPersistCardColor = hinos.some((hino) => Object.prototype.hasOwnProperty.call(hino, "card_color"));
   saveHinosToCache(hinos);
   renderHinos();
 }
@@ -243,17 +291,26 @@ async function addHino() {
     return;
   }
 
-  const { error } = await supabaseClient
+  const payload = buildHinoPayload({
+    title: title.trim(),
+    lyrics: "Digite aqui a letra do hino...",
+    color: "#222222",
+    fontSize: 20,
+    cardColor: "#ffffff"
+  });
+
+  let { error } = await supabaseClient
     .from("hinos")
-    .insert([
-      {
-        title: title.trim(),
-        lyrics: "Digite aqui a letra do hino...",
-        color: "#222222",
-        font_size: 20,
-        card_color: "#ffffff"
-      }
-    ]);
+    .insert([payload]);
+
+  if (isMissingCardColorColumnError(error) && Object.prototype.hasOwnProperty.call(payload, "card_color")) {
+    canPersistCardColor = false;
+    const { card_color: _cardColor, ...payloadWithoutCardColor } = payload;
+
+    ({ error } = await supabaseClient
+      .from("hinos")
+      .insert([payloadWithoutCardColor]));
+  }
 
   if (error) {
     alert("Erro ao criar hino: " + error.message);
@@ -306,16 +363,15 @@ async function saveHino() {
   const color = hinoLyrics.style.color || "#222222";
   const cardColor = currentHino.card_color || "#ffffff";
 
-  const { error } = await supabaseClient
-    .from("hinos")
-    .update({
-      title: title,
-      lyrics: hinoLyrics.innerHTML,
-      color: color,
-      font_size: fontSize,
-      card_color: cardColor
-    })
-    .eq("id", currentHino.id);
+  const payload = buildHinoPayload({
+    title,
+    lyrics: hinoLyrics.innerHTML,
+    color,
+    fontSize,
+    cardColor
+  });
+
+  const error = await saveHinoRecord(currentHino.id, payload);
 
   if (error) {
     alert("Erro ao salvar hino: " + error.message);
