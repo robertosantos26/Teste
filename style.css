@@ -60,7 +60,7 @@ main {
 }
 
 .hino-item:hover {
-  background: #eaf3ee;
+  filter: brightness(0.97);
 }
 
 .hidden {
@@ -79,14 +79,33 @@ main {
 
 .hino-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
   margin: 15px 0;
 }
 
+.hino-title-area {
+  flex: 1;
+}
+
 #hinoTitle {
   margin: 0;
+}
+
+.edit-label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.title-input {
+  width: 100%;
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 20px;
+  padding: 10px 12px;
 }
 
 .hino-header button {
@@ -119,7 +138,9 @@ main {
 }
 
 .edit-tools.hidden,
-.color-palette.hidden {
+.color-palette.hidden,
+.edit-label.hidden,
+.title-input.hidden {
   display: none;
 }
 

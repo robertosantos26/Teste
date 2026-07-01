@@ -2,6 +2,14 @@
 
 Aplicação web simples para listar, criar e editar hinos com dados salvos no Supabase.
 
+## Campos no Supabase
+
+A tabela `hinos` deve ter, além dos campos já usados pelo app, o campo opcional `card_color` do tipo texto para salvar a cor de cada card. Exemplo:
+
+```sql
+alter table hinos add column if not exists card_color text default '#ffffff';
+```
+
 ## Offline parcial (PWA)
 
 - O app pode ser instalado na tela inicial (Android e iOS/Safari).

@@ -39,17 +39,31 @@
       <button class="back-btn" onclick="goHome()">← Voltar</button>
 
       <div class="hino-header">
-        <h2 id="hinoTitle"></h2>
+        <div class="hino-title-area">
+          <h2 id="hinoTitle"></h2>
+          <label id="titleEditLabel" class="edit-label hidden" for="hinoTitleInput">Título do hino</label>
+          <input id="hinoTitleInput" class="title-input hidden" type="text" maxlength="120" />
+        </div>
         <button id="editBtn" class="edit-icon-btn" onclick="enableEdit()" title="Editar hino">✏️ Editar</button>
       </div>
 
       <div id="editTools" class="edit-tools hidden">
+        <button id="cardColorBtn" onclick="toggleCardColorPalette()">Cor do card</button>
         <button id="colorBtn" onclick="toggleColorPalette()">Cor da letra</button>
         <button id="increaseFontBtn" onclick="increaseFont()">A+</button>
         <button id="decreaseFontBtn" onclick="decreaseFont()">A-</button>
         <button id="saveBtn" onclick="saveHino()">Salvar</button>
       </div>
-      <div id="colorPalette" class="color-palette hidden">
+      <div id="cardColorPalette" class="color-palette hidden" aria-label="Escolher cor do card">
+        <button class="color-swatch" style="background:#ffffff" onclick="applyCardColor('#ffffff')" title="Branco"></button>
+        <button class="color-swatch" style="background:#fbe9e7" onclick="applyCardColor('#fbe9e7')" title="Rosa claro"></button>
+        <button class="color-swatch" style="background:#fff8e1" onclick="applyCardColor('#fff8e1')" title="Amarelo claro"></button>
+        <button class="color-swatch" style="background:#e8f5e9" onclick="applyCardColor('#e8f5e9')" title="Verde claro"></button>
+        <button class="color-swatch" style="background:#e3f2fd" onclick="applyCardColor('#e3f2fd')" title="Azul claro"></button>
+        <button class="color-swatch" style="background:#ede7f6" onclick="applyCardColor('#ede7f6')" title="Roxo claro"></button>
+        <button class="color-swatch" style="background:#1f4f3a" onclick="applyCardColor('#1f4f3a')" title="Verde escuro"></button>
+      </div>
+      <div id="colorPalette" class="color-palette hidden" aria-label="Escolher cor da letra">
         <button class="color-swatch" style="background:#d32f2f" onclick="applySelectedColor('#d32f2f')" title="Vermelho"></button>
         <button class="color-swatch" style="background:#f57c00" onclick="applySelectedColor('#f57c00')" title="Laranja"></button>
         <button class="color-swatch" style="background:#fbc02d" onclick="applySelectedColor('#fbc02d')" title="Amarelo"></button>
