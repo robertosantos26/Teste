@@ -15,9 +15,12 @@ const hinoPage = document.getElementById("hinoPage");
 const hinosList = document.getElementById("hinosList");
 const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
+const hinoTitleInput = document.getElementById("hinoTitleInput");
+const titleEditLabel = document.getElementById("titleEditLabel");
 const editTools = document.getElementById("editTools");
 const editBtn = document.getElementById("editBtn");
 const colorPalette = document.getElementById("colorPalette");
+const cardColorPalette = document.getElementById("cardColorPalette");
 const connectionStatus = document.getElementById("connectionStatus");
 
 const installBtn = document.getElementById("installBtn");
@@ -93,9 +96,17 @@ let isEditMode = false;
 function setEditMode(enabled) {
   isEditMode = enabled;
   hinoLyrics.contentEditable = enabled ? "true" : "false";
+  hinoTitle.classList.toggle("hidden", enabled);
+  titleEditLabel.classList.toggle("hidden", !enabled);
+  hinoTitleInput.classList.toggle("hidden", !enabled);
   editTools.classList.toggle("hidden", !enabled);
   colorPalette.classList.add("hidden");
+  cardColorPalette.classList.add("hidden");
   editBtn.textContent = enabled ? "✏️ Editando" : "✏️ Editar";
+
+  if (enabled && currentHino) {
+    hinoTitleInput.value = currentHino.title || "";
+  }
 }
 
 function updateConnectionStatus() {
@@ -186,6 +197,8 @@ function renderHinos(customMessage = "", customType = "info") {
     const div = document.createElement("div");
     div.className = "hino-item";
     div.textContent = hino.title;
+    div.style.backgroundColor = hino.card_color || "#ffffff";
+    div.style.color = getReadableTextColor(hino.card_color || "#ffffff");
     div.onclick = () => openHino(hino);
     hinosList.appendChild(div);
   });
@@ -195,6 +208,7 @@ function openHino(hino) {
   currentHino = hino;
 
   hinoTitle.textContent = hino.title;
+  hinoTitleInput.value = hino.title || "";
   hinoLyrics.innerHTML = hino.lyrics || "";
   hinoLyrics.style.color = hino.color || "#222222";
   hinoLyrics.style.fontSize = (hino.font_size || 20) + "px";
@@ -236,7 +250,8 @@ async function addHino() {
         title: title.trim(),
         lyrics: "Digite aqui a letra do hino...",
         color: "#222222",
-        font_size: 20
+        font_size: 20,
+        card_color: "#ffffff"
       }
     ]);
 
@@ -279,15 +294,26 @@ async function saveHino() {
     return;
   }
 
+  const title = hinoTitleInput.value.trim();
+
+  if (!title) {
+    alert("Digite um título válido.");
+    hinoTitleInput.focus();
+    return;
+  }
+
   const fontSize = parseInt(hinoLyrics.style.fontSize) || 20;
   const color = hinoLyrics.style.color || "#222222";
+  const cardColor = currentHino.card_color || "#ffffff";
 
   const { error } = await supabaseClient
     .from("hinos")
     .update({
+      title: title,
       lyrics: hinoLyrics.innerHTML,
       color: color,
-      font_size: fontSize
+      font_size: fontSize,
+      card_color: cardColor
     })
     .eq("id", currentHino.id);
 
@@ -297,9 +323,42 @@ async function saveHino() {
     return;
   }
 
+  currentHino.title = title;
+  hinoTitle.textContent = title;
   setEditMode(false);
   alert("Hino salvo com sucesso.");
   loadHinos();
+}
+
+function toggleCardColorPalette() {
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
+    return;
+  }
+  cardColorPalette.classList.toggle("hidden");
+}
+
+function applyCardColor(color) {
+  if (!isEditMode) {
+    alert("Clique em Editar para liberar as ferramentas.");
+    return;
+  }
+
+  currentHino.card_color = color;
+  cardColorPalette.classList.add("hidden");
+}
+
+function getReadableTextColor(backgroundColor) {
+  const hex = backgroundColor.replace("#", "");
+
+  if (hex.length !== 6) return "#222222";
+
+  const red = parseInt(hex.substring(0, 2), 16);
+  const green = parseInt(hex.substring(2, 4), 16);
+  const blue = parseInt(hex.substring(4, 6), 16);
+  const brightness = (red * 299 + green * 587 + blue * 114) / 1000;
+
+  return brightness > 145 ? "#222222" : "#ffffff";
 }
 
 function toggleColorPalette() {
@@ -387,6 +446,8 @@ window.goHome = goHome;
 window.enableEdit = enableEdit;
 window.saveHino = saveHino;
 window.toggleColorPalette = toggleColorPalette;
+window.toggleCardColorPalette = toggleCardColorPalette;
+window.applyCardColor = applyCardColor;
 window.applySelectedColor = applySelectedColor;
 window.increaseFont = increaseFont;
 window.decreaseFont = decreaseFont;
