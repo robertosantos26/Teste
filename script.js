@@ -3,17 +3,27 @@ const SUPABASE_ANON_KEY = "sb_publishable_yRqdQszi8m3rV4ybrZnysw_j6N1_uWH";
 const PASSWORD = "atos1";
 
 const HINOS_CACHE_KEY = "hinos_cache_v1";
+const DEFAULT_CATEGORY = "coral";
+const CATEGORY_LABELS = {
+  coral: "Coral",
+  banda: "Banda"
+};
 
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let hinos = [];
 let currentHino = null;
+let currentCategory = DEFAULT_CATEGORY;
 let isUsingOfflineCache = false;
 let canPersistCardColor = false;
+let canPersistCategory = true;
 
 const homePage = document.getElementById("homePage");
 const hinoPage = document.getElementById("hinoPage");
 const hinosList = document.getElementById("hinosList");
+const listTitle = document.getElementById("listTitle");
+const coralTab = document.getElementById("coralTab");
+const bandaTab = document.getElementById("bandaTab");
 const hinoTitle = document.getElementById("hinoTitle");
 const hinoLyrics = document.getElementById("hinoLyrics");
 const hinoTitleInput = document.getElementById("hinoTitleInput");
@@ -147,19 +157,31 @@ function checkPassword() {
   return senha === PASSWORD;
 }
 
-function isMissingCardColorColumnError(error) {
+function isMissingColumnError(error, columnName) {
   if (!error) return false;
 
   const message = `${error.message || ""} ${error.details || ""} ${error.hint || ""}`.toLowerCase();
 
-  return message.includes("card_color") && (
+  return message.includes(columnName) && (
     message.includes("schema cache") ||
     message.includes("column") ||
     error.code === "PGRST204"
   );
 }
 
-function buildHinoPayload({ title, lyrics, color, fontSize, cardColor }, includeCardColor = canPersistCardColor) {
+function isMissingCardColorColumnError(error) {
+  return isMissingColumnError(error, "card_color");
+}
+
+function isMissingCategoryColumnError(error) {
+  return isMissingColumnError(error, "category");
+}
+
+function buildHinoPayload(
+  { title, lyrics, color, fontSize, cardColor, category },
+  includeCardColor = canPersistCardColor,
+  includeCategory = true
+) {
   const payload = {
     title,
     lyrics,
@@ -171,26 +193,40 @@ function buildHinoPayload({ title, lyrics, color, fontSize, cardColor }, include
     payload.card_color = cardColor;
   }
 
+  if (includeCategory) {
+    payload.category = category || DEFAULT_CATEGORY;
+  }
+
   return payload;
 }
 
 async function saveHinoRecord(id, payload) {
-  let { error } = await supabaseClient
-    .from("hinos")
-    .update(payload)
-    .eq("id", id);
+  let nextPayload = { ...payload };
 
-  if (isMissingCardColorColumnError(error) && Object.prototype.hasOwnProperty.call(payload, "card_color")) {
-    canPersistCardColor = false;
-    const { card_color: _cardColor, ...payloadWithoutCardColor } = payload;
-
-    ({ error } = await supabaseClient
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const { error } = await supabaseClient
       .from("hinos")
-      .update(payloadWithoutCardColor)
-      .eq("id", id));
+      .update(nextPayload)
+      .eq("id", id);
+
+    if (!error) return null;
+
+    if (isMissingCardColorColumnError(error) && Object.prototype.hasOwnProperty.call(nextPayload, "card_color")) {
+      canPersistCardColor = false;
+      const { card_color: _cardColor, ...payloadWithoutCardColor } = nextPayload;
+      nextPayload = payloadWithoutCardColor;
+      continue;
+    }
+
+    if (isMissingCategoryColumnError(error) && Object.prototype.hasOwnProperty.call(nextPayload, "category")) {
+      canPersistCategory = false;
+      return error;
+    }
+
+    return error;
   }
 
-  return error;
+  return null;
 }
 
 async function loadHinos() {
@@ -221,12 +257,33 @@ async function loadHinos() {
   isUsingOfflineCache = false;
   hinos = data || [];
   canPersistCardColor = hinos.some((hino) => Object.prototype.hasOwnProperty.call(hino, "card_color"));
+  canPersistCategory = hinos.length === 0 || hinos.some((hino) => Object.prototype.hasOwnProperty.call(hino, "category"));
   saveHinosToCache(hinos);
+  renderHinos();
+}
+
+function getHinoCategory(hino) {
+  return hino.category || DEFAULT_CATEGORY;
+}
+
+function updateTabs() {
+  listTitle.textContent = `Lista de Músicas do ${CATEGORY_LABELS[currentCategory]}`;
+  coralTab.classList.toggle("active", currentCategory === "coral");
+  bandaTab.classList.toggle("active", currentCategory === "banda");
+  coralTab.setAttribute("aria-selected", currentCategory === "coral");
+  bandaTab.setAttribute("aria-selected", currentCategory === "banda");
+}
+
+function selectCategory(category) {
+  if (!CATEGORY_LABELS[category]) return;
+
+  currentCategory = category;
   renderHinos();
 }
 
 function renderHinos(customMessage = "", customType = "info") {
   hinosList.innerHTML = "";
+  updateTabs();
 
   if (isUsingOfflineCache) {
     showInfoMessage("Você está vendo dados salvos no aparelho (modo offline parcial).", "warning");
@@ -236,12 +293,14 @@ function renderHinos(customMessage = "", customType = "info") {
     showInfoMessage(customMessage, customType);
   }
 
-  if (hinos.length === 0) {
-    showInfoMessage("Nenhum hino cadastrado ainda.", "muted");
+  const visibleHinos = hinos.filter((hino) => getHinoCategory(hino) === currentCategory);
+
+  if (visibleHinos.length === 0) {
+    showInfoMessage(`Nenhuma música do ${CATEGORY_LABELS[currentCategory].toLowerCase()} cadastrada ainda.`, "muted");
     return;
   }
 
-  hinos.forEach((hino) => {
+  visibleHinos.forEach((hino) => {
     const div = document.createElement("div");
     div.className = "hino-item";
     div.textContent = hino.title;
@@ -284,7 +343,7 @@ async function addHino() {
     return;
   }
 
-  const title = prompt("Digite o título do novo hino:");
+  const title = prompt(`Digite o título da nova música do ${CATEGORY_LABELS[currentCategory].toLowerCase()}:`);
 
   if (!title || title.trim() === "") {
     alert("Digite um título válido.");
@@ -296,24 +355,41 @@ async function addHino() {
     lyrics: "Digite aqui a letra do hino...",
     color: "#222222",
     fontSize: 20,
-    cardColor: "#ffffff"
+    cardColor: "#ffffff",
+    category: currentCategory
   });
 
-  let { error } = await supabaseClient
-    .from("hinos")
-    .insert([payload]);
+  let nextPayload = { ...payload };
+  let error = null;
 
-  if (isMissingCardColorColumnError(error) && Object.prototype.hasOwnProperty.call(payload, "card_color")) {
-    canPersistCardColor = false;
-    const { card_color: _cardColor, ...payloadWithoutCardColor } = payload;
-
+  for (let attempt = 0; attempt < 3; attempt += 1) {
     ({ error } = await supabaseClient
       .from("hinos")
-      .insert([payloadWithoutCardColor]));
+      .insert([nextPayload]));
+
+    if (!error) break;
+
+    if (isMissingCardColorColumnError(error) && Object.prototype.hasOwnProperty.call(nextPayload, "card_color")) {
+      canPersistCardColor = false;
+      const { card_color: _cardColor, ...payloadWithoutCardColor } = nextPayload;
+      nextPayload = payloadWithoutCardColor;
+      continue;
+    }
+
+    if (isMissingCategoryColumnError(error) && Object.prototype.hasOwnProperty.call(nextPayload, "category")) {
+      canPersistCategory = false;
+      break;
+    }
+
+    break;
   }
 
   if (error) {
-    alert("Erro ao criar hino: " + error.message);
+    if (isMissingCategoryColumnError(error)) {
+      alert("Erro ao criar hino: a coluna 'category' precisa existir no Supabase para separar Coral e Banda. Execute o SQL indicado no README.");
+    } else {
+      alert("Erro ao criar hino: " + error.message);
+    }
     console.error(error);
     return;
   }
@@ -368,13 +444,18 @@ async function saveHino() {
     lyrics: hinoLyrics.innerHTML,
     color,
     fontSize,
-    cardColor
+    cardColor,
+    category: getHinoCategory(currentHino)
   });
 
   const error = await saveHinoRecord(currentHino.id, payload);
 
   if (error) {
-    alert("Erro ao salvar hino: " + error.message);
+    if (isMissingCategoryColumnError(error)) {
+      alert("Erro ao salvar hino: a coluna 'category' precisa existir no Supabase para manter a música na aba correta.");
+    } else {
+      alert("Erro ao salvar hino: " + error.message);
+    }
     console.error(error);
     return;
   }
@@ -498,6 +579,7 @@ window.addEventListener("offline", () => {
 });
 
 window.addHino = addHino;
+window.selectCategory = selectCategory;
 window.goHome = goHome;
 window.enableEdit = enableEdit;
 window.saveHino = saveHino;

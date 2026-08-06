@@ -1,4 +1,4 @@
-const CACHE_NAME = "hinos-pwa-v4";
+const CACHE_NAME = "hinos-pwa-v6";
 const ASSETS_TO_CACHE = [
   "./",
   "./index.html",
