@@ -4,10 +4,16 @@ Aplicação web simples para listar, criar e editar hinos com dados salvos no Su
 
 ## Campos no Supabase
 
-A tabela `hinos` deve ter, além dos campos já usados pelo app, o campo opcional `card_color` do tipo texto para salvar a cor de cada card. Exemplo:
+A tabela `hinos` deve ter, além dos campos já usados pelo app, os campos opcionais abaixo:
+
+- `card_color` do tipo texto para salvar a cor de cada card.
+- `category` do tipo texto para separar as músicas do coral e da banda. Registros antigos sem categoria aparecem na aba **Coral**.
+
+Exemplo:
 
 ```sql
 alter table hinos add column if not exists card_color text default '#ffffff';
+alter table hinos add column if not exists category text default 'coral';
 ```
 
 ## Offline parcial (PWA)

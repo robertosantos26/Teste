@@ -28,9 +28,14 @@
   <main>
     <section id="homePage">
       <div class="top-bar">
-        <h2>Lista de Hinos</h2>
-        <button onclick="addHino()" title="Adicionar novo hino">+</button>
+        <h2 id="listTitle">Lista de Hinos do Coral</h2>
+        <button onclick="addHino()" title="Adicionar nova música">+</button>
       </div>
+
+      <nav class="tabs" aria-label="Selecionar lista de músicas">
+        <button id="coralTab" class="tab active" type="button" onclick="selectCategory('coral')">Coral</button>
+        <button id="bandaTab" class="tab" type="button" onclick="selectCategory('banda')">Banda</button>
+      </nav>
 
       <div id="hinosList"></div>
     </section>
