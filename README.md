@@ -7,7 +7,7 @@ Aplicação web simples para listar, criar e editar hinos com dados salvos no Su
 A tabela `hinos` deve ter, além dos campos já usados pelo app, os campos opcionais abaixo:
 
 - `card_color` do tipo texto para salvar a cor de cada card.
-- `category` do tipo texto para separar as músicas do coral e da banda. Registros antigos sem categoria aparecem na aba **Coral**.
+- `category` do tipo texto para separar as músicas do coral e da banda. Este campo é necessário para que novas músicas criadas na aba **Banda** continuem aparecendo nela; registros antigos sem categoria aparecem na aba **Coral**.
 
 Exemplo:
 

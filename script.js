@@ -180,7 +180,7 @@ function isMissingCategoryColumnError(error) {
 function buildHinoPayload(
   { title, lyrics, color, fontSize, cardColor, category },
   includeCardColor = canPersistCardColor,
-  includeCategory = canPersistCategory
+  includeCategory = true
 ) {
   const payload = {
     title,
@@ -220,9 +220,7 @@ async function saveHinoRecord(id, payload) {
 
     if (isMissingCategoryColumnError(error) && Object.prototype.hasOwnProperty.call(nextPayload, "category")) {
       canPersistCategory = false;
-      const { category: _category, ...payloadWithoutCategory } = nextPayload;
-      nextPayload = payloadWithoutCategory;
-      continue;
+      return error;
     }
 
     return error;
@@ -380,16 +378,18 @@ async function addHino() {
 
     if (isMissingCategoryColumnError(error) && Object.prototype.hasOwnProperty.call(nextPayload, "category")) {
       canPersistCategory = false;
-      const { category: _category, ...payloadWithoutCategory } = nextPayload;
-      nextPayload = payloadWithoutCategory;
-      continue;
+      break;
     }
 
     break;
   }
 
   if (error) {
-    alert("Erro ao criar hino: " + error.message);
+    if (isMissingCategoryColumnError(error)) {
+      alert("Erro ao criar hino: a coluna 'category' precisa existir no Supabase para separar Coral e Banda. Execute o SQL indicado no README.");
+    } else {
+      alert("Erro ao criar hino: " + error.message);
+    }
     console.error(error);
     return;
   }
@@ -451,7 +451,11 @@ async function saveHino() {
   const error = await saveHinoRecord(currentHino.id, payload);
 
   if (error) {
-    alert("Erro ao salvar hino: " + error.message);
+    if (isMissingCategoryColumnError(error)) {
+      alert("Erro ao salvar hino: a coluna 'category' precisa existir no Supabase para manter a música na aba correta.");
+    } else {
+      alert("Erro ao salvar hino: " + error.message);
+    }
     console.error(error);
     return;
   }
