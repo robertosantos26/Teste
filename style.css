@@ -638,11 +638,21 @@ main {
   box-shadow: var(--shadow-card);
   font-family: var(--font-mono);
   font-size: 16.5px;
-  line-height: 2;
+  line-height: 1.55;
 }
 
 .cifra-line {
-  min-height: 1.2em;
+  min-height: 1.55em;
+  white-space: pre-wrap;
+}
+
+.cifra-segment {
+  ruby-position: over;
+}
+
+.chord-row {
+  line-height: 1;
+  text-align: left;
 }
 
 .chord {
@@ -653,6 +663,10 @@ main {
   padding: 1px 5px;
   margin: 0 1px;
   display: inline-block;
+}
+
+.lyric-row {
+  color: inherit;
 }
 
 .cifra-empty {
