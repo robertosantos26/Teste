@@ -22,6 +22,8 @@ alter table hinos add column if not exists tom text default '';
 alter table hinos add column if not exists cifra text default '';
 ```
 
+Se você só precisa habilitar a cifra para Coral e Banda em uma instalação existente, também pode executar o script completo em [`sql/adicionar-cifra-hinos.sql`](sql/adicionar-cifra-hinos.sql).
+
 - `card_color`: cor de cada card na lista.
 - `category`: separa as músicas do Coral e da Banda. Necessário para que músicas criadas na aba **Banda** continuem aparecendo nela; registros antigos sem categoria aparecem em Coral.
 - `tom`: tom original do hino (texto livre, ex: `G`, `Am`, `Bb`, `D`).
