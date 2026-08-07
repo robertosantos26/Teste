@@ -638,10 +638,28 @@ main {
   box-shadow: var(--shadow-card);
   font-family: var(--font-mono);
   font-size: 16.5px;
-  line-height: 2;
+  line-height: 1.35;
+  overflow-x: auto;
 }
 
 .cifra-line {
+  min-height: 2.8em;
+  white-space: pre;
+}
+
+.cifra-segment {
+  display: inline-grid;
+  grid-template-rows: 1.2em auto;
+  vertical-align: top;
+}
+
+.chord-row,
+.lyric-row {
+  display: block;
+  min-width: 100%;
+}
+
+.chord-row {
   min-height: 1.2em;
 }
 
@@ -653,6 +671,10 @@ main {
   padding: 1px 5px;
   margin: 0 1px;
   display: inline-block;
+}
+
+.lyric-row {
+  color: inherit;
 }
 
 .cifra-empty {
