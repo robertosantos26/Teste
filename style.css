@@ -661,6 +661,20 @@ main {
 
 .chord-row {
   min-height: 1.2em;
+  white-space: pre;
+}
+
+.cifra-segment {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+.chord-row {
+  position: absolute;
+  left: 0;
+  bottom: 1.05em;
+  line-height: 1;
 }
 
 .chord {
