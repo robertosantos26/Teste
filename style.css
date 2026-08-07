@@ -657,6 +657,7 @@ main {
 
 .chord {
   color: var(--gold-deep);
+   font-size: 18px;
   font-weight: 700;
   background: rgba(201, 169, 97, 0.16);
   border-radius: 4px;
