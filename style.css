@@ -638,43 +638,21 @@ main {
   box-shadow: var(--shadow-card);
   font-family: var(--font-mono);
   font-size: 16.5px;
-  line-height: 1.35;
-  overflow-x: auto;
+  line-height: 1.55;
 }
 
 .cifra-line {
-  min-height: 2.8em;
-  white-space: pre;
+  min-height: 1.55em;
+  white-space: pre-wrap;
 }
 
 .cifra-segment {
-  display: inline-grid;
-  grid-template-rows: 1.2em auto;
-  vertical-align: top;
-}
-
-.chord-row,
-.lyric-row {
-  display: block;
-  min-width: 100%;
+  ruby-position: over;
 }
 
 .chord-row {
-  min-height: 1.2em;
-  white-space: pre;
-}
-
-.cifra-segment {
-  position: relative;
-  display: inline-block;
-  vertical-align: baseline;
-}
-
-.chord-row {
-  position: absolute;
-  left: 0;
-  bottom: 1.05em;
   line-height: 1;
+  text-align: left;
 }
 
 .chord {

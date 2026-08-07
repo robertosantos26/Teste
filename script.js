@@ -548,9 +548,12 @@ function renderCifraLine(line) {
 
   return segments.map(({ chord, text }) => {
     const lyricText = text || "&nbsp;";
-    const chordHtml = chord ? `<span class="chord">${chord}</span>` : "&nbsp;";
 
-    return `<span class="cifra-segment"><span class="chord-row">${chordHtml}</span><span class="lyric-row">${lyricText}</span></span>`;
+    if (!chord) {
+      return `<span class="lyric-row">${lyricText}</span>`;
+    }
+
+    return `<ruby class="cifra-segment"><span class="lyric-row">${lyricText}</span><rt class="chord-row"><span class="chord">${chord}</span></rt></ruby>`;
   }).join("");
 }
 
