@@ -642,7 +642,7 @@ main {
 }
 
 .cifra-line {
-  min-height: 1.00em;
+  min-height: 1.55em;
   white-space: pre-wrap;
 }
 
@@ -651,7 +651,7 @@ main {
 }
 
 .chord-row {
-  line-height: 1;
+  line-height: 0.7;
   text-align: left;
 }
 
