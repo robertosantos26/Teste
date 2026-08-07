@@ -520,15 +520,47 @@ function guessUseFlats(tom) {
 /* ============================================================
    Renderização de cifra (com acordes destacados)
    ============================================================ */
+function renderCifraLine(line) {
+  if (!line) return "&nbsp;";
+
+  const segments = [];
+  const chordRegex = /\[([^\]]+)\]/g;
+  let lastIndex = 0;
+  let pendingChord = "";
+  let match;
+
+  while ((match = chordRegex.exec(line)) !== null) {
+    const textBeforeChord = line.slice(lastIndex, match.index);
+
+    if (textBeforeChord) {
+      segments.push({ chord: pendingChord, text: textBeforeChord });
+      pendingChord = "";
+    }
+
+    pendingChord = match[1];
+    lastIndex = chordRegex.lastIndex;
+  }
+
+  const textAfterLastChord = line.slice(lastIndex);
+  if (textAfterLastChord || pendingChord) {
+    segments.push({ chord: pendingChord, text: textAfterLastChord });
+  }
+
+  return segments.map(({ chord, text }) => {
+    const lyricText = text || "&nbsp;";
+    const chordHtml = chord ? `<span class="chord">${chord}</span>` : "&nbsp;";
+
+    return `<span class="cifra-segment"><span class="chord-row">${chordHtml}</span><span class="lyric-row">${lyricText}</span></span>`;
+  }).join("");
+}
+
 function renderCifraHtml(rawText) {
   const escaped = escapeHtml(rawText);
   const transposed = transposeCifraText(escaped, transposeOffset, useFlatsForCurrentHino);
 
-  const withChordSpans = transposed.replace(/\[([^\]]+)\]/g, (m, chord) => `<span class="chord">${chord}</span>`);
-
-  return withChordSpans
+  return transposed
     .split("\n")
-    .map((line) => `<div class="cifra-line">${line || "&nbsp;"}</div>`)
+    .map((line) => `<div class="cifra-line">${renderCifraLine(line)}</div>`)
     .join("");
 }
 

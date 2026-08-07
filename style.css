@@ -643,6 +643,20 @@ main {
 
 .cifra-line {
   min-height: 1.2em;
+  white-space: pre;
+}
+
+.cifra-segment {
+  position: relative;
+  display: inline-block;
+  vertical-align: baseline;
+}
+
+.chord-row {
+  position: absolute;
+  left: 0;
+  bottom: 1.05em;
+  line-height: 1;
 }
 
 .chord {
@@ -653,6 +667,10 @@ main {
   padding: 1px 5px;
   margin: 0 1px;
   display: inline-block;
+}
+
+.lyric-row {
+  color: inherit;
 }
 
 .cifra-empty {
